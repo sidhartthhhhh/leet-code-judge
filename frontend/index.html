@@ -11,61 +11,142 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <!-- Babel to transpile JSX in the browser -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <!-- CodeMirror Editor Libraries -->
-    <script src="https://unpkg.com/@codemirror/state@6.4.1/dist/index.js"></script>
-    <script src="https://unpkg.com/@codemirror/view@6.26.3/dist/index.js"></script>
-    <script src="https://unpkg.com/@codemirror/commands@6.5.0/dist/index.js"></script>
-    <script src="https://unpkg.com/@codemirror/lang-javascript@6.2.2/dist/index.js"></script>
-    <script src="https://unpkg.com/@codemirror/lang-python@6.1.6/dist/index.js"></script>
-    <script src="https://unpkg.com/@codemirror/lang-java@6.0.1/dist/index.js"></script>
-    <script src="https://unpkg.com/@codemirror/lang-cpp@6.0.2/dist/index.js"></script>
-    <script src="https://unpkg.com/@codemirror/theme-one-dark@6.1.2/dist/index.js"></script>
+
+    <!-- CodeMirror Editor Libraries (UMD builds) -->
+    <script src="https://unpkg.com/@codemirror/state@6.4.1/dist/index.umd.js"></script>
+    <script src="https://unpkg.com/@codemirror/view@6.26.3/dist/index.umd.js"></script>
+    <script src="https://unpkg.com/@codemirror/commands@6.5.0/dist/index.umd.js"></script>
+    <script src="https://unpkg.com/@codemirror/language@6.10.1/dist/index.umd.js"></script>
+    <script src="https://unpkg.com/@lezer/javascript@1.4.8/dist/index.umd.js"></script>
+    <script src="https://unpkg.com/@codemirror/lang-javascript@6.2.2/dist/index.umd.js"></script>
+    <script src="https://unpkg.com/@lezer/python@1.1.8/dist/index.umd.js"></script>
+    <script src="https://unpkg.com/@codemirror/lang-python@6.1.6/dist/index.umd.js"></script>
+    <script src="https://unpkg.com/@lezer/java@1.0.3/dist/index.umd.js"></script>
+    <script src="https://unpkg.com/@codemirror/lang-java@6.0.1/dist/index.umd.js"></script>
+    <script src="https://unpkg.com/@lezer/cpp@1.1.3/dist/index.umd.js"></script>
+    <script src="https://unpkg.com/@codemirror/lang-cpp@6.0.2/dist/index.umd.js"></script>
+    <script src="https://unpkg.com/@codemirror/theme-one-dark@6.1.2/dist/index.umd.js"></script>
+    <style>
+        .cm-editor { height: 100%; }
+    </style>
 </head>
-<body class="bg-gray-100">
+<body class="bg-gray-800">
     <div id="root"></div>
 
     <script type="text/babel">
         // --- Configuration ---
-        // IMPORTANT: Update this URL to point to your running Flask backend.
         const API_BASE_URL = "http://127.0.0.1:5000";
 
         // --- React Hooks and Components ---
         const { useState, useEffect, useRef } = React;
 
         // --- Mock Data ---
-        const mockProblem = {
-            id: 42,
-            title: "Two Sum",
-            difficulty: "Easy",
-            description: `
-                <p class="mb-4">Given an array of integers <code>nums</code> and an integer <code>target</code>, return <em>indices of the two numbers such that they add up to <code>target</code></em>.</p>
-                <p class="mb-4">You may assume that each input would have <strong>exactly one solution</strong>, and you may not use the <em>same</em> element twice.</p>
-                <p class="mb-4">You can return the answer in any order.</p>
-                <div class="mt-6">
-                    <h3 class="font-semibold mb-2">Example 1:</h3>
-                    <pre class="bg-gray-800 text-white p-3 rounded-md text-sm"><strong>Input:</strong> nums = [2,7,11,15], target = 9\n<strong>Output:</strong> [0,1]\n<strong>Explanation:</strong> Because nums[0] + nums[1] == 9, we return [0, 1].</pre>
-                </div>
-            `,
-            boilerplate: {
-                python: 'class Solution:\n    def twoSum(self, nums, target):\n        # Your code here\n        pass',
-                javascript: '/**\n * @param {number[]} nums\n * @param {number} target\n * @return {number[]}\n */\nvar twoSum = function(nums, target) {\n    \n};',
-                java: 'class Solution {\n    public int[] twoSum(int[] nums, int target) {\n        \n    }\n}',
-                cpp: 'class Solution {\npublic:\n    vector<int> twoSum(vector<int>& nums, int target) {\n        \n    }\n};'
-            }
-        };
+        const mockProblems = [
+            {
+                id: 1,
+                title: "Two Sum",
+                difficulty: "Easy",
+                description: `<p class="mb-4">Given an array of integers <code>nums</code> and an integer <code>target</code>, return indices of the two numbers such that they add up to <code>target</code>.</p><p>You may assume that each input would have <strong>exactly one solution</strong>, and you may not use the <em>same</em> element twice.</p><p>You can return the answer in any order.</p>`,
+                examples: [
+                    { input: 'nums = [2,7,11,15], target = 9', output: '[0,1]', explanation: 'Because nums[0] + nums[1] == 9, we return [0, 1].' },
+                    { input: 'nums = [3,2,4], target = 6', output: '[1,2]' },
+                    { input: 'nums = [3,3], target = 6', output: '[0,1]' },
+                ],
+                constraints: [
+                    '<code>2 <= nums.length <= 10<sup>4</sup></code>',
+                    '<code>-10<sup>9</sup> <= nums[i] <= 10<sup>9</sup></code>',
+                    '<code>-10<sup>9</sup> <= target <= 10<sup>9</sup></code>',
+                    '<strong>Only one valid answer exists.</strong>'
+                ],
+                hints: [
+                    'A really brute-force way would be to search for all possible pairs of numbers but that would be too slow. Or is it? Try to optimize it.',
+                    'Can you do it in one pass? If you iterate through the array, what information do you need to store to find the complement of the current number?'
+                ],
+                boilerplate: {
+                    python: `class Solution:\n    def twoSum(self, nums: list[int], target: int) -> list[int]:\n        # Your code here\n        pass`,
+                    javascript: `/**\n * @param {number[]} nums\n * @param {number} target\n * @return {number[]}\n */\nvar twoSum = function(nums, target) {\n    \n};`,
+                    java: `class Solution {\n    public int[] twoSum(int[] nums, int target) {\n        \n    }\n}`,
+                    cpp: `class Solution {\npublic:\n    vector<int> twoSum(vector<int>& nums, int target) {\n        \n    }\n};`
+                }
+            },
+            {
+                id: 2,
+                title: "Add Two Numbers",
+                difficulty: "Medium",
+                description: `<p class="mb-4">You are given two <strong>non-empty</strong> linked lists representing two non-negative integers. The digits are stored in <strong>reverse order</strong>, and each of their nodes contains a single digit. Add the two numbers and return the sum as a linked list.</p><p>You may assume the two numbers do not contain any leading zero, except the number 0 itself.</p>`,
+                examples: [
+                    { input: 'l1 = [2,4,3], l2 = [5,6,4]', output: '[7,0,8]', explanation: '342 + 465 = 807.' },
+                    { input: 'l1 = [0], l2 = [0]', output: '[0]' },
+                    { input: 'l1 = [9,9,9,9,9,9,9], l2 = [9,9,9,9]', output: '[8,9,9,9,0,0,0,1]' },
+                ],
+                constraints: [
+                    'The number of nodes in each linked list is in the range <code>[1, 100]</code>.',
+                    '<code>0 <= Node.val <= 9</code>',
+                    'It is guaranteed that the list represents a number that does not have leading zeros.'
+                ],
+                hints: [
+                    'Simulate the addition process digit by digit, from head to tail, while keeping track of the carry.',
+                    'You might need to create a new node for the carry if it exists after iterating through both lists.'
+                ],
+                boilerplate: {
+                    python: `# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n    def addTwoNumbers(self, l1: Optional[ListNode], l2: Optional[ListNode]) -> Optional[ListNode]:\n        # Your code here\n        pass`,
+                    javascript: `/**\n * Definition for singly-linked list.\n * function ListNode(val, next) {\n * this.val = (val===undefined ? 0 : val)\n * this.next = (next===undefined ? null : next)\n * }\n */\n/**\n * @param {ListNode} l1\n * @param {ListNode} l2\n * @return {ListNode}\n */\nvar addTwoNumbers = function(l1, l2) {\n    \n};`,
+                    java: `/**\n * Definition for singly-linked list.\n * public class ListNode {\n * int val;\n * ListNode next;\n * ListNode() {}\n * ListNode(int val) { this.val = val; }\n * ListNode(int val, ListNode next) { this.val = val; this.next = next; }\n * }\n */\nclass Solution {\n    public ListNode addTwoNumbers(ListNode l1, ListNode l2) {\n        \n    }\n}`,
+                    cpp: `/**\n * Definition for singly-linked list.\n * struct ListNode {\n * int val;\n * ListNode *next;\n * ListNode() : val(0), next(nullptr) {}\n * ListNode(int x) : val(x), next(nullptr) {}\n * ListNode(int x, ListNode *next) : val(x), next(next) {}\n * };\n */\nclass Solution {\npublic:\n    ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {\n        \n    }\n};`
+                }
+            },
+            {
+                id: 3,
+                title: "Longest Substring Without Repeating Characters",
+                difficulty: "Medium",
+                description: `<p class="mb-4">Given a string <code>s</code>, find the length of the <strong>longest substring</strong> without repeating characters.</p>`,
+                examples: [
+                    { input: 's = "abcabcbb"', output: '3', explanation: 'The answer is "abc", with the length of 3.' },
+                    { input: 's = "bbbbb"', output: '1', explanation: 'The answer is "b", with the length of 1.' },
+                    { input: 's = "pwwkew"', output: '3', explanation: 'The answer is "wke", with the length of 3. Notice that the answer must be a substring, "pwke" is a subsequence and not a substring.' },
+                ],
+                constraints: [
+                    '<code>0 <= s.length <= 5 * 10<sup>4</sup></code>',
+                    '<code>s</code> consists of English letters, digits, symbols and spaces.'
+                ],
+                hints: [
+                    'Use a sliding window approach.',
+                    'A set or a hash map can be used to efficiently check for duplicate characters in the current window.'
+                ],
+                boilerplate: {
+                    python: `class Solution:\n    def lengthOfLongestSubstring(self, s: str) -> int:\n        # Your code here\n        pass`,
+                    javascript: `/**\n * @param {string} s\n * @return {number}\n */\nvar lengthOfLongestSubstring = function(s) {\n    \n};`,
+                    java: `class Solution {\n    public int lengthOfLongestSubstring(String s) {\n        \n    }\n}`,
+                    cpp: `class Solution {\npublic:\n    int lengthOfLongestSubstring(string s) {\n        \n    }\n};`
+                }
+            },
+            // The rest of the problems remain as placeholders
+        ].concat([...Array(47)].map((_, i) => ({
+             id: 1000 + i,
+             title: `Placeholder Problem ${i + 1}`,
+             difficulty: ["Easy", "Medium", "Hard"][i % 3],
+             description: `<p>This is a placeholder description for problem ${i + 1}.</p>`,
+             examples: [],
+             constraints: [],
+             hints: [],
+             boilerplate: {
+                 python: `# Placeholder for problem ${i + 1}`,
+                 javascript: `// Placeholder for problem ${i + 1}`,
+                 java: `// Placeholder for problem ${i + 1}`,
+                 cpp: `// Placeholder for problem ${i + 1}`
+             }
+        })));
         
         const CodeEditor = ({ language, boilerplate, onCodeChange }) => {
             const editorRef = useRef(null);
             const viewRef = useRef(null);
             const [isEditorReady, setIsEditorReady] = useState(false);
 
-            // This effect checks if the CodeMirror libraries are loaded.
             useEffect(() => {
                 const checkLibs = () => {
-                    if (window["@codemirror/state"] && window["@codemirror/view"] && window["@codemirror/commands"]) {
+                    if (window.state && window.view && window.commands) {
                         setIsEditorReady(true);
                     } else {
-                        // If not loaded, check again shortly.
                         setTimeout(checkLibs, 100);
                     }
                 };
@@ -73,18 +154,17 @@
             }, []);
 
             useEffect(() => {
-                // Don't initialize the editor until the libraries are confirmed to be ready.
                 if (!isEditorReady || !editorRef.current) return;
 
-                const { EditorState } = window["@codemirror/state"];
-                const { EditorView, keymap } = window["@codemirror/view"];
-                const { defaultKeymap } = window["@codemirror/commands"];
-                const { oneDark } = window["@codemirror/theme-one-dark"];
+                const { EditorState } = window.state;
+                const { EditorView, keymap } = window.view;
+                const { defaultKeymap } = window.commands;
+                const { oneDark } = window.themeOneDark;
                 const languageExtensions = {
-                    python: window["@codemirror/lang-python"].python(),
-                    javascript: window["@codemirror/lang-javascript"].javascript(),
-                    java: window["@codemirror/lang-java"].java(),
-                    cpp: window["@codemirror/lang-cpp"].cpp(),
+                    python: window.langPython.python(),
+                    javascript: window.langJavascript.javascript(),
+                    java: window.langJava.java(),
+                    cpp: window.langCpp.cpp(),
                 };
 
                 const onUpdate = EditorView.updateListener.of(update => {
@@ -92,115 +172,209 @@
                         onCodeChange(update.state.doc.toString());
                     }
                 });
-
-                if (!viewRef.current) {
-                    const startState = EditorState.create({
-                        doc: boilerplate,
-                        extensions: [
-                            keymap.of(defaultKeymap),
-                            languageExtensions[language],
-                            oneDark,
-                            EditorView.lineWrapping,
-                            onUpdate
-                        ],
-                    });
-                    viewRef.current = new EditorView({ state: startState, parent: editorRef.current });
-                } else {
-                    viewRef.current.dispatch({
-                        effects: EditorState.reconfigure.of([
-                            keymap.of(defaultKeymap),
-                            languageExtensions[language],
-                            oneDark,
-                            EditorView.lineWrapping,
-                            onUpdate
-                        ])
-                    });
-                    viewRef.current.dispatch({
-                        changes: { from: 0, to: viewRef.current.state.doc.length, insert: boilerplate }
-                    });
+                
+                if (viewRef.current) {
+                    viewRef.current.destroy();
                 }
+
+                const startState = EditorState.create({
+                    doc: boilerplate,
+                    extensions: [
+                        keymap.of(defaultKeymap),
+                        languageExtensions[language],
+                        oneDark,
+                        EditorView.lineWrapping,
+                        onUpdate
+                    ],
+                });
+                viewRef.current = new EditorView({ state: startState, parent: editorRef.current });
+
             }, [isEditorReady, language, boilerplate]);
 
             if (!isEditorReady) {
-                return <div className="h-full w-full bg-[#282c34] flex items-center justify-center text-white/50">Loading Editor...</div>;
+                return <div className="h-full w-full bg-[#2d2d2d] flex items-center justify-center text-white/50">Loading Editor...</div>;
             }
 
-            return <div ref={editorRef} className="h-full w-full bg-[#282c34]"></div>;
+            return <div ref={editorRef} className="h-full w-full bg-[#2d2d2d]"></div>;
         };
 
-        const ProblemDescription = ({ problem }) => {
+        const ProblemDescription = ({ problem, onShowProblemList }) => {
+            if (!problem) return null;
             const difficultyColor = { 'Easy': 'text-green-500', 'Medium': 'text-yellow-500', 'Hard': 'text-red-500' };
             return (
-                <div className="p-6 h-full overflow-y-auto bg-white">
-                    <h1 className="text-2xl font-bold mb-2">{problem.title}</h1>
-                    <p className={`font-semibold ${difficultyColor[problem.difficulty]}`}>{problem.difficulty}</p>
-                    <hr className="my-4" />
-                    <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: problem.description }} />
-                </div>
-            );
-        };
-
-        const SubmissionResult = ({ result }) => {
-            if (!result) {
-                return (
-                    <div className="p-6 h-full flex items-center justify-center bg-white">
-                        <p className="text-gray-500">Submit your code to see the result.</p>
+                <div className="p-6 h-full overflow-y-auto text-gray-300">
+                    <div className="flex justify-between items-center mb-4">
+                        <h1 className="text-xl font-medium text-gray-100">{problem.id}. {problem.title}</h1>
+                        <button onClick={onShowProblemList} className="text-sm bg-gray-700 hover:bg-gray-600 text-white font-semibold py-1 px-3 rounded-md transition">
+                            View All Problems
+                        </button>
                     </div>
-                );
-            }
+                    <p className={`font-medium text-sm ${difficultyColor[problem.difficulty]}`}>{problem.difficulty}</p>
+                    <hr className="my-4 border-gray-600" />
+                    
+                    <div className="prose prose-invert max-w-none text-gray-300" dangerouslySetInnerHTML={{ __html: problem.description }} />
+                    
+                    {problem.examples && problem.examples.length > 0 && (
+                        <div className="mt-6 space-y-4">
+                            {problem.examples.map((ex, index) => (
+                                <div key={index}>
+                                    <p className="font-medium text-gray-300">Example {index + 1}:</p>
+                                    <pre className="bg-gray-900/50 p-3 rounded-md text-sm mt-2 whitespace-pre-wrap">
+                                        <strong className="text-gray-400">Input:</strong> {ex.input}<br />
+                                        <strong className="text-gray-400">Output:</strong> {ex.output}
+                                        {ex.explanation && <><br /><strong className="text-gray-400">Explanation:</strong> {ex.explanation}</>}
+                                    </pre>
+                                </div>
+                            ))}
+                        </div>
+                    )}
 
-            const getStatusPill = (status) => {
-                switch (status) {
-                    case 'PENDING':
-                    case 'Running':
-                        return <span className="px-3 py-1 text-sm font-semibold rounded-full bg-yellow-100 text-yellow-800 animate-pulse">{status}...</span>;
-                    case 'Accepted':
-                        return <span className="px-3 py-1 text-sm font-semibold rounded-full bg-green-100 text-green-800">Accepted</span>;
-                    default:
-                        return <span className="px-3 py-1 text-sm font-semibold rounded-full bg-red-100 text-red-800">{status}</span>;
-                }
-            };
+                    {problem.constraints && problem.constraints.length > 0 && (
+                        <div className="mt-6">
+                            <h3 className="font-semibold mb-2 text-gray-200">Constraints:</h3>
+                            <ul className="list-disc list-inside space-y-1 text-sm text-gray-400">
+                                {problem.constraints.map((c, index) => <li key={index} dangerouslySetInnerHTML={{ __html: c }} />)}
+                            </ul>
+                        </div>
+                    )}
 
-            return (
-                <div className="p-6 h-full bg-white">
-                    <h2 className="text-xl font-bold mb-4">Result</h2>
-                    <div className="flex items-center gap-4 mb-6">
-                        {getStatusPill(result.status)}
-                    </div>
-                    {result.status !== 'PENDING' && result.status !== 'Running' && result.result && (
-                        <div className="space-y-2 text-sm">
-                            <p><strong>Runtime:</strong> <span className="font-mono">{result.result.runtime_ms} ms</span></p>
-                            <p><strong>Memory:</strong> <span className="font-mono">{result.result.memory_kb} KB</span></p>
+                     {problem.hints && problem.hints.length > 0 && (
+                         <div className="mt-6">
+                            <h3 className="font-semibold mb-2 text-gray-200">Hints:</h3>
+                             <ul className="list-disc list-inside space-y-1 text-sm text-gray-400">
+                                {problem.hints.map((h, index) => <li key={index}>{h}</li>)}
+                            </ul>
                         </div>
                     )}
                 </div>
             );
         };
+        
+        const ProblemListModal = ({ problems, onSelectProblem, onClose }) => {
+            const difficultyColor = { 'Easy': 'text-green-400', 'Medium': 'text-yellow-400', 'Hard': 'text-red-400' };
+            return (
+                <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+                    <div className="bg-gray-800 rounded-lg shadow-xl w-full max-w-3xl h-full max-h-[90vh] flex flex-col">
+                        <div className="flex justify-between items-center p-4 border-b border-gray-700">
+                            <h2 className="text-xl font-bold text-white">Problems</h2>
+                            <button onClick={onClose} className="text-gray-400 hover:text-white text-2xl font-bold">&times;</button>
+                        </div>
+                        <div className="overflow-y-auto">
+                            <table className="w-full text-sm text-left text-gray-400">
+                                <thead className="text-xs text-gray-400 uppercase bg-gray-700/50 sticky top-0">
+                                    <tr>
+                                        <th scope="col" className="px-6 py-3">Title</th>
+                                        <th scope="col" className="px-6 py-3">Difficulty</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {problems.map(p => (
+                                        <tr key={p.id} onClick={() => onSelectProblem(p)} className="bg-gray-800 border-b border-gray-700 hover:bg-gray-700 cursor-pointer">
+                                            <td className="px-6 py-4 font-medium text-gray-200 whitespace-nowrap">{p.id}. {p.title}</td>
+                                            <td className={`px-6 py-4 ${difficultyColor[p.difficulty]}`}>{p.difficulty}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const ResultPanel = ({ result }) => {
+            const [activeTab, setActiveTab] = useState('testcase');
+
+            const getStatusPill = (status) => {
+                switch (status) {
+                    case 'PENDING':
+                    case 'Running':
+                        return <span className="px-3 py-1 text-sm font-semibold rounded-full bg-yellow-400 text-yellow-900 animate-pulse">{status}...</span>;
+                    case 'Accepted':
+                        return <span className="px-3 py-1 text-sm font-semibold rounded-full bg-green-400 text-green-900">Accepted</span>;
+                    default:
+                        return <span className="px-3 py-1 text-sm font-semibold rounded-full bg-red-400 text-red-900">{status}</span>;
+                }
+            };
+            
+            return (
+                <div className="bg-gray-800 text-gray-300 rounded-b-lg">
+                    <div className="flex border-b border-gray-700">
+                        <button 
+                            onClick={() => setActiveTab('testcase')}
+                            className={`px-4 py-2 text-sm font-medium ${activeTab === 'testcase' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:bg-gray-700/50'}`}>
+                            Testcase
+                        </button>
+                        <button 
+                            onClick={() => setActiveTab('result')}
+                            className={`px-4 py-2 text-sm font-medium ${activeTab === 'result' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:bg-gray-700/50'}`}>
+                            Test Result
+                        </button>
+                    </div>
+                    <div className="p-4">
+                        {activeTab === 'testcase' && (
+                            <div>
+                                <label className="text-xs font-semibold" htmlFor="testcase-input">Input</label>
+                                <textarea id="testcase-input" className="w-full mt-1 p-2 bg-gray-900 border border-gray-600 rounded-md text-sm font-mono" rows="3" defaultValue='s = "leeetcode"'></textarea>
+                            </div>
+                        )}
+                        {activeTab === 'result' && (
+                            !result ? (
+                                <div className="flex items-center justify-center h-24">
+                                    <p className="text-gray-500">Run submission to see result.</p>
+                                </div>
+                            ) : (
+                                <div>
+                                    <div className="flex items-center gap-4 mb-4">
+                                        {getStatusPill(result.status)}
+                                    </div>
+                                    {result.status !== 'PENDING' && result.status !== 'Running' && result.result && (
+                                        <div className="space-y-2 text-sm">
+                                            <p><strong>Runtime:</strong> <span className="font-mono">{result.result.runtime_ms} ms</span></p>
+                                            <p><strong>Memory:</strong> <span className="font-mono">{result.result.memory_kb} KB</span></p>
+                                        </div>
+                                    )}
+                                </div>
+                            )
+                        )}
+                    </div>
+                </div>
+            )
+        };
 
         const App = () => {
-            const [problem, setProblem] = useState(mockProblem);
+            const [problems, setProblems] = useState(mockProblems);
+            const [currentProblem, setCurrentProblem] = useState(problems.find(p => p.id === 1)); // Start with Two Sum
             const [language, setLanguage] = useState('python');
-            const [code, setCode] = useState(mockProblem.boilerplate.python);
+            const [code, setCode] = useState(currentProblem.boilerplate.python);
             const [submissionResult, setSubmissionResult] = useState(null);
             const [isSubmitting, setIsSubmitting] = useState(false);
+            const [isProblemListVisible, setIsProblemListVisible] = useState(false);
             const pollingIntervalRef = useRef(null);
+
+            useEffect(() => {
+                setCode(currentProblem.boilerplate[language]);
+                setSubmissionResult(null); 
+            }, [currentProblem, language]);
 
             const handleLanguageChange = (e) => {
                 const newLang = e.target.value;
                 setLanguage(newLang);
-                setCode(problem.boilerplate[newLang]);
             };
             
             const handleCodeChange = (newCode) => setCode(newCode);
+            
+            const handleSelectProblem = (problem) => {
+                setCurrentProblem(problem);
+                setIsProblemListVisible(false);
+            };
 
             const pollForResult = (submissionId) => {
                 pollingIntervalRef.current = setInterval(async () => {
                     try {
                         const res = await fetch(`${API_BASE_URL}/api/v1/submissions/${submissionId}`);
                         const data = await res.json();
-                        
                         setSubmissionResult(data);
-
                         if (data.status !== 'PENDING' && data.status !== 'Running') {
                             clearInterval(pollingIntervalRef.current);
                             setIsSubmitting(false);
@@ -218,30 +392,23 @@
                 setIsSubmitting(true);
                 setSubmissionResult({ status: 'PENDING' });
 
-                if (pollingIntervalRef.current) {
-                    clearInterval(pollingIntervalRef.current);
-                }
+                if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
 
                 try {
                     const response = await fetch(`${API_BASE_URL}/api/v1/submissions`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            user_id: 1, // Mock user_id
-                            problem_id: problem.id,
+                            user_id: 1,
+                            problem_id: currentProblem.id,
                             code: code,
                             language: language,
                         }),
                     });
-
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                     const data = await response.json();
                     setSubmissionResult(data);
                     pollForResult(data.submission_id);
-
                 } catch (error) {
                     console.error("Submission failed:", error);
                     setSubmissionResult({ status: 'Submission Error' });
@@ -251,48 +418,49 @@
             
             useEffect(() => {
                 return () => {
-                    if (pollingIntervalRef.current) {
-                        clearInterval(pollingIntervalRef.current);
-                    }
+                    if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
                 };
             }, []);
 
             return (
-                <div className="flex flex-col h-screen font-sans bg-gray-100">
-                    <header className="flex-shrink-0 bg-white shadow-md z-10">
-                        <div className="h-16 flex items-center justify-between px-6">
-                            <div className="text-xl font-bold text-gray-800">LeetCode Judge</div>
-                            <div><div className="w-10 h-10 bg-indigo-500 rounded-full"></div></div>
+                <div className="flex flex-col h-screen font-sans bg-gray-900 text-gray-200">
+                    {isProblemListVisible && (
+                        <ProblemListModal 
+                            problems={problems} 
+                            onSelectProblem={handleSelectProblem} 
+                            onClose={() => setIsProblemListVisible(false)} 
+                        />
+                    )}
+                    <header className="flex-shrink-0 bg-gray-800 shadow-md z-10">
+                        <div className="h-14 flex items-center justify-between px-4">
+                            <div className="text-lg font-semibold">LeetCode Judge</div>
+                            <div className="flex items-center gap-4">
+                                <button onClick={handleSubmit} disabled={isSubmitting} className="px-4 py-1.5 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 disabled:bg-gray-500 transition">
+                                    {isSubmitting ? 'Submitting...' : 'Submit'}
+                                </button>
+                                <div className="w-8 h-8 bg-gray-600 rounded-full"></div>
+                            </div>
                         </div>
                     </header>
                     
-                    <main className="flex-grow flex flex-col md:flex-row overflow-hidden">
-                        <div className="w-full md:w-1/3 h-1/2 md:h-full border-r border-gray-300">
-                           <ProblemDescription problem={problem} />
+                    <main className="flex-grow flex flex-col md:flex-row overflow-hidden p-2 gap-2">
+                        <div className="w-full md:w-1/2 h-full flex flex-col bg-gray-800 rounded-lg overflow-hidden">
+                           <ProblemDescription problem={currentProblem} onShowProblemList={() => setIsProblemListVisible(true)} />
                         </div>
-                        <div className="w-full md:w-2/3 h-1/2 md:h-full flex flex-col">
-                            <div className="flex-grow flex flex-col h-3/5">
-                                <div className="flex-shrink-0 flex items-center justify-between bg-gray-200 px-4 py-2 border-b border-gray-300">
-                                    <select value={language} onChange={handleLanguageChange} className="px-3 py-1 border border-gray-400 rounded-md bg-white">
-                                        <option value="python">Python</option>
-                                        <option value="javascript">JavaScript</option>
-                                        <option value="java">Java</option>
-                                        <option value="cpp">C++</option>
-                                    </select>
-                                </div>
-                                <div className="flex-grow relative">
-                                   <CodeEditor language={language} boilerplate={problem.boilerplate[language]} onCodeChange={handleCodeChange} />
-                                </div>
+                        <div className="w-full md:w-1/2 h-full flex flex-col rounded-lg overflow-hidden">
+                            <div className="flex-shrink-0 flex items-center justify-between bg-gray-800 px-4 py-2 rounded-t-lg">
+                                <select value={language} onChange={handleLanguageChange} className="px-3 py-1 border border-gray-600 rounded-md bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                    <option value="python">Python</option>
+                                    <option value="javascript">JavaScript</option>
+                                    <option value="java">Java</option>
+                                    <option value="cpp">C++</option>
+                                </select>
                             </div>
-                            <div className="flex-shrink-0 h-2/5 border-t border-gray-300 flex flex-col">
-                                 <div className="flex-shrink-0 flex items-center justify-end bg-gray-200 px-4 py-2">
-                                     <button onClick={handleSubmit} disabled={isSubmitting} className="px-6 py-2 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 disabled:bg-gray-400 transition">
-                                        {isSubmitting ? 'Submitting...' : 'Submit'}
-                                    </button>
-                                 </div>
-                                 <div className="flex-grow overflow-y-auto">
-                                    <SubmissionResult result={submissionResult} />
-                                 </div>
+                            <div className="flex-grow relative" style={{minHeight: '200px'}}>
+                               <CodeEditor language={language} boilerplate={code} onCodeChange={handleCodeChange} />
+                            </div>
+                            <div className="flex-shrink-0">
+                                 <ResultPanel result={submissionResult} />
                             </div>
                         </div>
                     </main>
