@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LeetCode Judge</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React Libraries -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <!-- Babel to transpile JSX in the browser -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- CodeMirror Editor Libraries -->
+    <script src="https://unpkg.com/@codemirror/state@6.4.1/dist/index.js"></script>
+    <script src="https://unpkg.com/@codemirror/view@6.26.3/dist/index.js"></script>
+    <script src="https://unpkg.com/@codemirror/commands@6.5.0/dist/index.js"></script>
+    <script src="https://unpkg.com/@codemirror/lang-javascript@6.2.2/dist/index.js"></script>
+    <script src="https://unpkg.com/@codemirror/lang-python@6.1.6/dist/index.js"></script>
+    <script src="https://unpkg.com/@codemirror/lang-java@6.0.1/dist/index.js"></script>
+    <script src="https://unpkg.com/@codemirror/lang-cpp@6.0.2/dist/index.js"></script>
+    <script src="https://unpkg.com/@codemirror/theme-one-dark@6.1.2/dist/index.js"></script>
+</head>
+<body class="bg-gray-100">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // --- Configuration ---
+        // IMPORTANT: Update this URL to point to your running Flask backend.
+        const API_BASE_URL = "http://127.0.0.1:5000";
+
+        // --- React Hooks and Components ---
+        const { useState, useEffect, useRef } = React;
+
+        // --- Mock Data ---
+        const mockProblem = {
+            id: 42,
+            title: "Two Sum",
+            difficulty: "Easy",
+            description: `
+                <p class="mb-4">Given an array of integers <code>nums</code> and an integer <code>target</code>, return <em>indices of the two numbers such that they add up to <code>target</code></em>.</p>
+                <p class="mb-4">You may assume that each input would have <strong>exactly one solution</strong>, and you may not use the <em>same</em> element twice.</p>
+                <p class="mb-4">You can return the answer in any order.</p>
+                <div class="mt-6">
+                    <h3 class="font-semibold mb-2">Example 1:</h3>
+                    <pre class="bg-gray-800 text-white p-3 rounded-md text-sm"><strong>Input:</strong> nums = [2,7,11,15], target = 9\n<strong>Output:</strong> [0,1]\n<strong>Explanation:</strong> Because nums[0] + nums[1] == 9, we return [0, 1].</pre>
+                </div>
+            `,
+            boilerplate: {
+                python: 'class Solution:\n    def twoSum(self, nums, target):\n        # Your code here\n        pass',
+                javascript: '/**\n * @param {number[]} nums\n * @param {number} target\n * @return {number[]}\n */\nvar twoSum = function(nums, target) {\n    \n};',
+                java: 'class Solution {\n    public int[] twoSum(int[] nums, int target) {\n        \n    }\n}',
+                cpp: 'class Solution {\npublic:\n    vector<int> twoSum(vector<int>& nums, int target) {\n        \n    }\n};'
+            }
+        };
+        
+        const CodeEditor = ({ language, boilerplate, onCodeChange }) => {
+            const editorRef = useRef(null);
+            const viewRef = useRef(null);
+            const [isEditorReady, setIsEditorReady] = useState(false);
+
+            // This effect checks if the CodeMirror libraries are loaded.
+            useEffect(() => {
+                const checkLibs = () => {
+                    if (window["@codemirror/state"] && window["@codemirror/view"] && window["@codemirror/commands"]) {
+                        setIsEditorReady(true);
+                    } else {
+                        // If not loaded, check again shortly.
+                        setTimeout(checkLibs, 100);
+                    }
+                };
+                checkLibs();
+            }, []);
+
+            useEffect(() => {
+                // Don't initialize the editor until the libraries are confirmed to be ready.
+                if (!isEditorReady || !editorRef.current) return;
+
+                const { EditorState } = window["@codemirror/state"];
+                const { EditorView, keymap } = window["@codemirror/view"];
+                const { defaultKeymap } = window["@codemirror/commands"];
+                const { oneDark } = window["@codemirror/theme-one-dark"];
+                const languageExtensions = {
+                    python: window["@codemirror/lang-python"].python(),
+                    javascript: window["@codemirror/lang-javascript"].javascript(),
+                    java: window["@codemirror/lang-java"].java(),
+                    cpp: window["@codemirror/lang-cpp"].cpp(),
+                };
+
+                const onUpdate = EditorView.updateListener.of(update => {
+                    if (update.docChanged) {
+                        onCodeChange(update.state.doc.toString());
+                    }
+                });
+
+                if (!viewRef.current) {
+                    const startState = EditorState.create({
+                        doc: boilerplate,
+                        extensions: [
+                            keymap.of(defaultKeymap),
+                            languageExtensions[language],
+                            oneDark,
+                            EditorView.lineWrapping,
+                            onUpdate
+                        ],
+                    });
+                    viewRef.current = new EditorView({ state: startState, parent: editorRef.current });
+                } else {
+                    viewRef.current.dispatch({
+                        effects: EditorState.reconfigure.of([
+                            keymap.of(defaultKeymap),
+                            languageExtensions[language],
+                            oneDark,
+                            EditorView.lineWrapping,
+                            onUpdate
+                        ])
+                    });
+                    viewRef.current.dispatch({
+                        changes: { from: 0, to: viewRef.current.state.doc.length, insert: boilerplate }
+                    });
+                }
+            }, [isEditorReady, language, boilerplate]);
+
+            if (!isEditorReady) {
+                return <div className="h-full w-full bg-[#282c34] flex items-center justify-center text-white/50">Loading Editor...</div>;
+            }
+
+            return <div ref={editorRef} className="h-full w-full bg-[#282c34]"></div>;
+        };
+
+        const ProblemDescription = ({ problem }) => {
+            const difficultyColor = { 'Easy': 'text-green-500', 'Medium': 'text-yellow-500', 'Hard': 'text-red-500' };
+            return (
+                <div className="p-6 h-full overflow-y-auto bg-white">
+                    <h1 className="text-2xl font-bold mb-2">{problem.title}</h1>
+                    <p className={`font-semibold ${difficultyColor[problem.difficulty]}`}>{problem.difficulty}</p>
+                    <hr className="my-4" />
+                    <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: problem.description }} />
+                </div>
+            );
+        };
+
+        const SubmissionResult = ({ result }) => {
+            if (!result) {
+                return (
+                    <div className="p-6 h-full flex items-center justify-center bg-white">
+                        <p className="text-gray-500">Submit your code to see the result.</p>
+                    </div>
+                );
+            }
+
+            const getStatusPill = (status) => {
+                switch (status) {
+                    case 'PENDING':
+                    case 'Running':
+                        return <span className="px-3 py-1 text-sm font-semibold rounded-full bg-yellow-100 text-yellow-800 animate-pulse">{status}...</span>;
+                    case 'Accepted':
+                        return <span className="px-3 py-1 text-sm font-semibold rounded-full bg-green-100 text-green-800">Accepted</span>;
+                    default:
+                        return <span className="px-3 py-1 text-sm font-semibold rounded-full bg-red-100 text-red-800">{status}</span>;
+                }
+            };
+
+            return (
+                <div className="p-6 h-full bg-white">
+                    <h2 className="text-xl font-bold mb-4">Result</h2>
+                    <div className="flex items-center gap-4 mb-6">
+                        {getStatusPill(result.status)}
+                    </div>
+                    {result.status !== 'PENDING' && result.status !== 'Running' && result.result && (
+                        <div className="space-y-2 text-sm">
+                            <p><strong>Runtime:</strong> <span className="font-mono">{result.result.runtime_ms} ms</span></p>
+                            <p><strong>Memory:</strong> <span className="font-mono">{result.result.memory_kb} KB</span></p>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const App = () => {
+            const [problem, setProblem] = useState(mockProblem);
+            const [language, setLanguage] = useState('python');
+            const [code, setCode] = useState(mockProblem.boilerplate.python);
+            const [submissionResult, setSubmissionResult] = useState(null);
+            const [isSubmitting, setIsSubmitting] = useState(false);
+            const pollingIntervalRef = useRef(null);
+
+            const handleLanguageChange = (e) => {
+                const newLang = e.target.value;
+                setLanguage(newLang);
+                setCode(problem.boilerplate[newLang]);
+            };
+            
+            const handleCodeChange = (newCode) => setCode(newCode);
+
+            const pollForResult = (submissionId) => {
+                pollingIntervalRef.current = setInterval(async () => {
+                    try {
+                        const res = await fetch(`${API_BASE_URL}/api/v1/submissions/${submissionId}`);
+                        const data = await res.json();
+                        
+                        setSubmissionResult(data);
+
+                        if (data.status !== 'PENDING' && data.status !== 'Running') {
+                            clearInterval(pollingIntervalRef.current);
+                            setIsSubmitting(false);
+                        }
+                    } catch (error) {
+                        console.error("Polling error:", error);
+                        clearInterval(pollingIntervalRef.current);
+                        setIsSubmitting(false);
+                    }
+                }, 2000);
+            };
+
+            const handleSubmit = async () => {
+                if (isSubmitting) return;
+                setIsSubmitting(true);
+                setSubmissionResult({ status: 'PENDING' });
+
+                if (pollingIntervalRef.current) {
+                    clearInterval(pollingIntervalRef.current);
+                }
+
+                try {
+                    const response = await fetch(`${API_BASE_URL}/api/v1/submissions`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            user_id: 1, // Mock user_id
+                            problem_id: problem.id,
+                            code: code,
+                            language: language,
+                        }),
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    setSubmissionResult(data);
+                    pollForResult(data.submission_id);
+
+                } catch (error) {
+                    console.error("Submission failed:", error);
+                    setSubmissionResult({ status: 'Submission Error' });
+                    setIsSubmitting(false);
+                }
+            };
+            
+            useEffect(() => {
+                return () => {
+                    if (pollingIntervalRef.current) {
+                        clearInterval(pollingIntervalRef.current);
+                    }
+                };
+            }, []);
+
+            return (
+                <div className="flex flex-col h-screen font-sans bg-gray-100">
+                    <header className="flex-shrink-0 bg-white shadow-md z-10">
+                        <div className="h-16 flex items-center justify-between px-6">
+                            <div className="text-xl font-bold text-gray-800">LeetCode Judge</div>
+                            <div><div className="w-10 h-10 bg-indigo-500 rounded-full"></div></div>
+                        </div>
+                    </header>
+                    
+                    <main className="flex-grow flex flex-col md:flex-row overflow-hidden">
+                        <div className="w-full md:w-1/3 h-1/2 md:h-full border-r border-gray-300">
+                           <ProblemDescription problem={problem} />
+                        </div>
+                        <div className="w-full md:w-2/3 h-1/2 md:h-full flex flex-col">
+                            <div className="flex-grow flex flex-col h-3/5">
+                                <div className="flex-shrink-0 flex items-center justify-between bg-gray-200 px-4 py-2 border-b border-gray-300">
+                                    <select value={language} onChange={handleLanguageChange} className="px-3 py-1 border border-gray-400 rounded-md bg-white">
+                                        <option value="python">Python</option>
+                                        <option value="javascript">JavaScript</option>
+                                        <option value="java">Java</option>
+                                        <option value="cpp">C++</option>
+                                    </select>
+                                </div>
+                                <div className="flex-grow relative">
+                                   <CodeEditor language={language} boilerplate={problem.boilerplate[language]} onCodeChange={handleCodeChange} />
+                                </div>
+                            </div>
+                            <div className="flex-shrink-0 h-2/5 border-t border-gray-300 flex flex-col">
+                                 <div className="flex-shrink-0 flex items-center justify-end bg-gray-200 px-4 py-2">
+                                     <button onClick={handleSubmit} disabled={isSubmitting} className="px-6 py-2 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 disabled:bg-gray-400 transition">
+                                        {isSubmitting ? 'Submitting...' : 'Submit'}
+                                    </button>
+                                 </div>
+                                 <div className="flex-grow overflow-y-auto">
+                                    <SubmissionResult result={submissionResult} />
+                                 </div>
+                            </div>
+                        </div>
+                    </main>
+                </div>
+            );
+        };
+
+        // --- Mount the App ---
+        const container = document.getElementById('root');
+        ReactDOM.createRoot(container).render(<App />);
+    </script>
+</body>
+</html>
