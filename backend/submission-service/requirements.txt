@@ -1,0 +1,5 @@
+flask
+pika
+pytest
+pytest-mock
+Flask-Cors
