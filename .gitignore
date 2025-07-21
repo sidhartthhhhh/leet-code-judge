@@ -1,0 +1,15 @@
+# Virtual environment
+venv/
+.env/
+
+# IDEs and editors
+.vscode/
+.idea/
+
+# Logs and temporary files
+*.log
+*.tmp
+.DS_Store
+
+# Environment variables
+.env
