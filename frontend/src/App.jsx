@@ -22,6 +22,8 @@ import { EditorView, keymap } from '@codemirror/view';
 
 // --- Configuration ---
 const API_BASE_URL = "http://127.0.0.1:5000";
+const API_BASE = "https://leet-backend.onrender.com";
+
 
 // --- Firebase Configuration ---
 const firebaseConfig = {
