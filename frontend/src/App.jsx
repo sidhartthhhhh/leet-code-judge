@@ -317,6 +317,25 @@ const LoginPage = ({ onGoogleLogin, onGithubLogin, onBack, error }) => {
 };
 
 const DashboardPage = ({ user, onLogout, onBackToApp }) => {
+    const [isEditing, setIsEditing] = useState(false);
+    const [socials, setSocials] = useState({
+        instagram: '',
+        linkedin: '',
+        facebook: '',
+        stackoverflow: '',
+        github: ''
+    });
+
+    const handleSocialChange = (e) => {
+        const { name, value } = e.target;
+        setSocials(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSave = () => {
+        console.log("Saving social links:", socials); // In a real app, save to a database
+        setIsEditing(false);
+    };
+
     return (
         <div className="h-screen bg-gray-900 text-white flex flex-col items-center justify-center p-4">
             <div className="w-full max-w-md p-8 bg-gray-800 rounded-lg shadow-lg text-center">
@@ -325,15 +344,50 @@ const DashboardPage = ({ user, onLogout, onBackToApp }) => {
                 <img src={user.photoURL || 'https://placehold.co/96x96/666/fff?text=U'} alt="User" className="w-24 h-24 rounded-full mx-auto mb-4" />
                 <h2 className="text-2xl font-bold">{user.displayName || 'Anonymous User'}</h2>
                 <p className="text-gray-400 mb-6">{user.email}</p>
+                
                 <div className="border-t border-gray-700 pt-6 mt-6">
-                    <h3 className="text-lg font-semibold text-gray-300 mb-4">Connect Your Socials</h3>
-                    <div className="flex items-center justify-center gap-6">
-                        <a href="#" className="text-gray-400 hover:text-white transition" title="Instagram"><svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M7.8,2H16.2C19.4,2 22,4.6 22,7.8V16.2A5.8,5.8 0 0,1 16.2,22H7.8C4.6,22 2,19.4 2,16.2V7.8A5.8,5.8 0 0,1 7.8,2M7.6,4A3.6,3.6 0 0,0 4,7.6V16.4C4,18.39 5.61,20 7.6,20H16.4A3.6,3.6 0 0,0 20,16.4V7.6C20,5.61 18.39,4 16.4,4H7.6M17.25,5.5A1.25,1.25 0 0,1 18.5,6.75A1.25,1.25 0 0,1 17.25,8A1.25,1.25 0 0,1 16,6.75A1.25,1.25 0 0,1 17.25,5.5M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9Z" /></svg></a>
-                        <a href="#" className="text-gray-400 hover:text-white transition" title="LinkedIn"><svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M19,3A2,2 0 0,1 21,5V19A2,2 0 0,1 19,21H5A2,2 0 0,1 3,19V5A2,2 0 0,1 5,3H19M18.5,18.5V13.2A3.26,3.26 0 0,0 15.24,9.94C14.39,9.94 13.4,10.43 12.92,11.24V10.13H10.13V18.5H12.92V13.57C12.92,12.8 13.54,12.17 14.31,12.17A1.4,1.4 0 0,1 15.71,13.57V18.5H18.5M6.88,8.56A1.68,1.68 0 0,0 8.56,6.88C8.56,6 7.78,5.2 6.88,5.2A1.69,1.69 0 0,0 5.2,6.88C5.2,7.78 6,8.56 6.88,8.56M8.27,18.5V10.13H5.5V18.5H8.27Z" /></svg></a>
-                        <a href="#" className="text-gray-400 hover:text-white transition" title="Facebook"><svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.04C6.5 2.04 2 6.53 2 12.06C2 17.06 5.66 21.21 10.44 21.96V14.96H7.9V12.06H10.44V9.85C10.44 7.32 11.93 5.96 14.22 5.96C15.31 5.96 16.45 6.15 16.45 6.15V8.62H15.19C13.95 8.62 13.56 9.39 13.56 10.18V12.06H16.34L15.89 14.96H13.56V21.96A10 10 0 0 0 22 12.06C22 6.53 17.5 2.04 12 2.04Z" /></svg></a>
-                        <a href="#" className="text-gray-400 hover:text-white transition" title="Stack Overflow"><svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M17.5,20H6.5V18H17.5V20M18,17H6A1,1 0 0,1 5,16V11H7V15H18V17M19,14H5V9H7V13H19V14M20,12H5V7H7V11H20V12M21,5H5V2H21V5Z" /></svg></a>
-                        <a href="#" className="text-gray-400 hover:text-white transition" title="GitHub"><svg className="w-8 h-8" fill="currentColor" viewBox="0 0 16 16"><path fillRule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg></a>
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-lg font-semibold text-gray-300">Connect Your Socials</h3>
+                        <button onClick={() => setIsEditing(!isEditing)} className="text-sm bg-gray-700 hover:bg-gray-600 text-white font-semibold py-1 px-3 rounded-md transition">
+                            {isEditing ? 'Cancel' : 'Edit'}
+                        </button>
                     </div>
+
+                    {isEditing ? (
+                        <div className="space-y-4 text-left">
+                            <div>
+                                <label className="text-xs font-semibold text-gray-400">Instagram URL</label>
+                                <input type="text" name="instagram" value={socials.instagram} onChange={handleSocialChange} className="w-full mt-1 p-2 bg-gray-900 border border-gray-600 rounded-md text-sm" placeholder="https://instagram.com/username" />
+                            </div>
+                             <div>
+                                <label className="text-xs font-semibold text-gray-400">LinkedIn URL</label>
+                                <input type="text" name="linkedin" value={socials.linkedin} onChange={handleSocialChange} className="w-full mt-1 p-2 bg-gray-900 border border-gray-600 rounded-md text-sm" placeholder="https://linkedin.com/in/username" />
+                            </div>
+                             <div>
+                                <label className="text-xs font-semibold text-gray-400">Facebook URL</label>
+                                <input type="text" name="facebook" value={socials.facebook} onChange={handleSocialChange} className="w-full mt-1 p-2 bg-gray-900 border border-gray-600 rounded-md text-sm" placeholder="https://facebook.com/username" />
+                            </div>
+                             <div>
+                                <label className="text-xs font-semibold text-gray-400">Stack Overflow URL</label>
+                                <input type="text" name="stackoverflow" value={socials.stackoverflow} onChange={handleSocialChange} className="w-full mt-1 p-2 bg-gray-900 border border-gray-600 rounded-md text-sm" placeholder="https://stackoverflow.com/users/userid/username" />
+                            </div>
+                             <div>
+                                <label className="text-xs font-semibold text-gray-400">GitHub URL</label>
+                                <input type="text" name="github" value={socials.github} onChange={handleSocialChange} className="w-full mt-1 p-2 bg-gray-900 border border-gray-600 rounded-md text-sm" placeholder="https://github.com/username" />
+                            </div>
+                            <button onClick={handleSave} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg transition">
+                                Save
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="flex items-center justify-center gap-6">
+                            <a href={socials.instagram || '#'} target="_blank" rel="noopener noreferrer" className={socials.instagram ? 'text-gray-400 hover:text-white transition' : 'text-gray-600 cursor-not-allowed'} title="Instagram"><svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M7.8,2H16.2C19.4,2 22,4.6 22,7.8V16.2A5.8,5.8 0 0,1 16.2,22H7.8C4.6,22 2,19.4 2,16.2V7.8A5.8,5.8 0 0,1 7.8,2M7.6,4A3.6,3.6 0 0,0 4,7.6V16.4C4,18.39 5.61,20 7.6,20H16.4A3.6,3.6 0 0,0 20,16.4V7.6C20,5.61 18.39,4 16.4,4H7.6M17.25,5.5A1.25,1.25 0 0,1 18.5,6.75A1.25,1.25 0 0,1 17.25,8A1.25,1.25 0 0,1 16,6.75A1.25,1.25 0 0,1 17.25,5.5M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9Z" /></svg></a>
+                            <a href={socials.linkedin || '#'} target="_blank" rel="noopener noreferrer" className={socials.linkedin ? 'text-gray-400 hover:text-white transition' : 'text-gray-600 cursor-not-allowed'} title="LinkedIn"><svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M19,3A2,2 0 0,1 21,5V19A2,2 0 0,1 19,21H5A2,2 0 0,1 3,19V5A2,2 0 0,1 5,3H19M18.5,18.5V13.2A3.26,3.26 0 0,0 15.24,9.94C14.39,9.94 13.4,10.43 12.92,11.24V10.13H10.13V18.5H12.92V13.57C12.92,12.8 13.54,12.17 14.31,12.17A1.4,1.4 0 0,1 15.71,13.57V18.5H18.5M6.88,8.56A1.68,1.68 0 0,0 8.56,6.88C8.56,6 7.78,5.2 6.88,5.2A1.69,1.69 0 0,0 5.2,6.88C5.2,7.78 6,8.56 6.88,8.56M8.27,18.5V10.13H5.5V18.5H8.27Z" /></svg></a>
+                            <a href={socials.facebook || '#'} target="_blank" rel="noopener noreferrer" className={socials.facebook ? 'text-gray-400 hover:text-white transition' : 'text-gray-600 cursor-not-allowed'} title="Facebook"><svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.04C6.5 2.04 2 6.53 2 12.06C2 17.06 5.66 21.21 10.44 21.96V14.96H7.9V12.06H10.44V9.85C10.44 7.32 11.93 5.96 14.22 5.96C15.31 5.96 16.45 6.15 16.45 6.15V8.62H15.19C13.95 8.62 13.56 9.39 13.56 10.18V12.06H16.34L15.89 14.96H13.56V21.96A10 10 0 0 0 22 12.06C22 6.53 17.5 2.04 12 2.04Z" /></svg></a>
+                            <a href={socials.stackoverflow || '#'} target="_blank" rel="noopener noreferrer" className={socials.stackoverflow ? 'text-gray-400 hover:text-white transition' : 'text-gray-600 cursor-not-allowed'} title="Stack Overflow"><svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M17.5,20H6.5V18H17.5V20M18,17H6A1,1 0 0,1 5,16V11H7V15H18V17M19,14H5V9H7V13H19V14M20,12H5V7H7V11H20V12M21,5H5V2H21V5Z" /></svg></a>
+                            <a href={socials.github || '#'} target="_blank" rel="noopener noreferrer" className={socials.github ? 'text-gray-400 hover:text-white transition' : 'text-gray-600 cursor-not-allowed'} title="GitHub"><svg className="w-8 h-8" fill="currentColor" viewBox="0 0 16 16"><path fillRule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg></a>
+                        </div>
+                    )}
                 </div>
                 <button onClick={onLogout} className="mt-8 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg transition">Logout</button>
             </div>
