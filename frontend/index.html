@@ -120,20 +120,94 @@
                     cpp: `class Solution {\npublic:\n    int lengthOfLongestSubstring(string s) {\n        \n    }\n};`
                 }
             },
-            // The rest of the problems remain as placeholders
-        ].concat([...Array(47)].map((_, i) => ({
+            {
+                id: 20,
+                title: "Valid Parentheses",
+                difficulty: "Easy",
+                description: `<p class="mb-4">Given a string <code>s</code> containing just the characters <code>'('</code>, <code>')'</code>, <code>'{'</code>, <code>'}'</code>, <code>'['</code> and <code>']'</code>, determine if the input string is valid.</p><p>An input string is valid if:</p><ol class="list-decimal list-inside"><li>Open brackets must be closed by the same type of brackets.</li><li>Open brackets must be closed in the correct order.</li></ol>`,
+                examples: [
+                    { input: 's = "()"', output: 'true' },
+                    { input: 's = "()[]{}"', output: 'true' },
+                    { input: 's = "(]"', output: 'false' },
+                ],
+                constraints: [
+                    '<code>1 <= s.length <= 10<sup>4</sup></code>',
+                    '<code>s</code> consists of parentheses only <code>\'()[]{}\'</code>.'
+                ],
+                hints: [
+                    'Use a stack to keep track of opening brackets.',
+                    'When you encounter a closing bracket, check if the top of the stack is the corresponding opening bracket.'
+                ],
+                boilerplate: {
+                    python: `class Solution:\n    def isValid(self, s: str) -> bool:\n        # Your code here\n        pass`,
+                    javascript: `/**\n * @param {string} s\n * @return {boolean}\n */\nvar isValid = function(s) {\n    \n};`,
+                    java: `class Solution {\n    public boolean isValid(String s) {\n        \n    }\n}`,
+                    cpp: `class Solution {\npublic:\n    bool isValid(string s) {\n        \n    }\n};`
+                }
+            },
+            {
+                id: 21,
+                title: "Merge Two Sorted Lists",
+                difficulty: "Easy",
+                description: `<p class="mb-4">You are given the heads of two sorted linked lists <code>list1</code> and <code>list2</code>.</p><p>Merge the two lists into one <strong>sorted</strong> list. The list should be made by splicing together the nodes of the first two lists.</p><p>Return <em>the head of the merged linked list</em>.</p>`,
+                examples: [
+                    { input: 'list1 = [1,2,4], list2 = [1,3,4]', output: '[1,1,2,3,4,4]' },
+                    { input: 'list1 = [], list2 = []', output: '[]' },
+                    { input: 'list1 = [], list2 = [0]', output: '[0]' },
+                ],
+                constraints: [
+                    'The number of nodes in both lists is in the range <code>[0, 50]</code>.',
+                    '<code>-100 <= Node.val <= 100</code>',
+                    'Both <code>list1</code> and <code>list2</code> are sorted in <strong>non-decreasing</strong> order.'
+                ],
+                hints: [
+                    'Create a dummy head for the new list to simplify edge cases.',
+                    'Iteratively compare the heads of both lists and append the smaller node to your new list.'
+                ],
+                boilerplate: {
+                    python: `# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n    def mergeTwoLists(self, list1: Optional[ListNode], list2: Optional[ListNode]) -> Optional[ListNode]:\n        # Your code here\n        pass`,
+                    javascript: `/**\n * Definition for singly-linked list.\n * function ListNode(val, next) { ... }\n */\nvar mergeTwoLists = function(list1, list2) {\n    \n};`,
+                    java: `/**\n * Definition for singly-linked list.\n * public class ListNode { ... }\n */\nclass Solution {\n    public ListNode mergeTwoLists(ListNode list1, ListNode list2) {\n        \n    }\n}`,
+                    cpp: `/**\n * Definition for singly-linked list.\n * struct ListNode { ... };\n */\nclass Solution {\npublic:\n    ListNode* mergeTwoLists(ListNode* list1, ListNode* list2) {\n        \n    }\n};`
+                }
+            },
+            {
+                id: 104,
+                title: "Maximum Depth of Binary Tree",
+                difficulty: "Easy",
+                description: `<p class="mb-4">Given the <code>root</code> of a binary tree, return <em>its maximum depth</em>.</p><p>A binary tree's <strong>maximum depth</strong> is the number of nodes along the longest path from the root node down to the farthest leaf node.</p>`,
+                examples: [
+                    { input: 'root = [3,9,20,null,null,15,7]', output: '3' },
+                    { input: 'root = [1,null,2]', output: '2' },
+                ],
+                constraints: [
+                    'The number of nodes in the tree is in the range <code>[0, 10<sup>4</sup>]</code>.',
+                    '<code>-100 <= Node.val <= 100</code>'
+                ],
+                hints: [
+                    'A recursive solution is very natural for this problem.',
+                    'The maximum depth of a tree is 1 + the maximum depth of its left or right subtree.'
+                ],
+                boilerplate: {
+                    python: `# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def maxDepth(self, root: Optional[TreeNode]) -> int:\n        # Your code here\n        pass`,
+                    javascript: `/**\n * Definition for a binary tree node.\n * function TreeNode(val, left, right) { ... }\n */\nvar maxDepth = function(root) {\n    \n};`,
+                    java: `/**\n * Definition for a binary tree node.\n * public class TreeNode { ... }\n */\nclass Solution {\n    public int maxDepth(TreeNode root) {\n        \n    }\n}`,
+                    cpp: `/**\n * Definition for a binary tree node.\n * struct TreeNode { ... };\n */\nclass Solution {\npublic:\n    int maxDepth(TreeNode* root) {\n        \n    }\n};`
+                }
+            },
+        ].concat([...Array(44)].map((_, i) => ({
              id: 1000 + i,
-             title: `Placeholder Problem ${i + 1}`,
+             title: `Placeholder Problem ${i + 4}`,
              difficulty: ["Easy", "Medium", "Hard"][i % 3],
-             description: `<p>This is a placeholder description for problem ${i + 1}.</p>`,
+             description: `<p>This is a placeholder description for problem ${i + 4}.</p>`,
              examples: [],
              constraints: [],
              hints: [],
              boilerplate: {
-                 python: `# Placeholder for problem ${i + 1}`,
-                 javascript: `// Placeholder for problem ${i + 1}`,
-                 java: `// Placeholder for problem ${i + 1}`,
-                 cpp: `// Placeholder for problem ${i + 1}`
+                 python: `# Placeholder for problem ${i + 4}`,
+                 javascript: `// Placeholder for problem ${i + 4}`,
+                 java: `// Placeholder for problem ${i + 4}`,
+                 cpp: `// Placeholder for problem ${i + 4}`
              }
         })));
         
@@ -198,17 +272,12 @@
             return <div ref={editorRef} className="h-full w-full bg-[#2d2d2d]"></div>;
         };
 
-        const ProblemDescription = ({ problem, onShowProblemList }) => {
+        const ProblemDescription = ({ problem }) => {
             if (!problem) return null;
             const difficultyColor = { 'Easy': 'text-green-500', 'Medium': 'text-yellow-500', 'Hard': 'text-red-500' };
             return (
                 <div className="p-6 h-full overflow-y-auto text-gray-300">
-                    <div className="flex justify-between items-center mb-4">
-                        <h1 className="text-xl font-medium text-gray-100">{problem.id}. {problem.title}</h1>
-                        <button onClick={onShowProblemList} className="text-sm bg-gray-700 hover:bg-gray-600 text-white font-semibold py-1 px-3 rounded-md transition">
-                            View All Problems
-                        </button>
-                    </div>
+                    <h1 className="text-xl font-medium text-gray-100 mb-4">{problem.id}. {problem.title}</h1>
                     <p className={`font-medium text-sm ${difficultyColor[problem.difficulty]}`}>{problem.difficulty}</p>
                     <hr className="my-4 border-gray-600" />
                     
@@ -433,19 +502,26 @@
                     )}
                     <header className="flex-shrink-0 bg-gray-800 shadow-md z-10">
                         <div className="h-14 flex items-center justify-between px-4">
-                            <div className="text-lg font-semibold">LeetCode Judge</div>
-                            <div className="flex items-center gap-4">
-                                <button onClick={handleSubmit} disabled={isSubmitting} className="px-4 py-1.5 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 disabled:bg-gray-500 transition">
+                            <div className="flex-1 flex justify-start">
+                                <button onClick={() => setIsProblemListVisible(true)} className="flex items-center gap-2 text-sm bg-gray-700 hover:bg-gray-600 text-white font-semibold py-1.5 px-3 rounded-md transition">
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                                    Problems
+                                </button>
+                            </div>
+                            <div className="flex-1 flex justify-center">
+                                <button onClick={handleSubmit} disabled={isSubmitting} className="px-6 py-1.5 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 disabled:bg-gray-500 transition">
                                     {isSubmitting ? 'Submitting...' : 'Submit'}
                                 </button>
-                                <div className="w-8 h-8 bg-gray-600 rounded-full"></div>
+                            </div>
+                            <div className="flex-1 flex justify-end">
+                                <div className="w-8 h-8 bg-gray-600 rounded-full cursor-pointer"></div>
                             </div>
                         </div>
                     </header>
                     
                     <main className="flex-grow flex flex-col md:flex-row overflow-hidden p-2 gap-2">
                         <div className="w-full md:w-1/2 h-full flex flex-col bg-gray-800 rounded-lg overflow-hidden">
-                           <ProblemDescription problem={currentProblem} onShowProblemList={() => setIsProblemListVisible(true)} />
+                           <ProblemDescription problem={currentProblem} />
                         </div>
                         <div className="w-full md:w-1/2 h-full flex flex-col rounded-lg overflow-hidden">
                             <div className="flex-shrink-0 flex items-center justify-between bg-gray-800 px-4 py-2 rounded-t-lg">
