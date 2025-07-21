@@ -55,6 +55,7 @@ const CodeEditor = ({ language, boilerplate, onCodeChange }) => {
     const editorRef = useRef(null);
     const viewRef = useRef(null);
 
+    // This effect initializes the editor and re-initializes it ONLY when the language changes.
     useEffect(() => {
         if (!editorRef.current) return;
 
@@ -71,6 +72,7 @@ const CodeEditor = ({ language, boilerplate, onCodeChange }) => {
             }
         });
         
+        // Destroy the previous instance if it exists
         if (viewRef.current) {
             viewRef.current.destroy();
         }
@@ -93,7 +95,17 @@ const CodeEditor = ({ language, boilerplate, onCodeChange }) => {
             }
         }
 
-    }, [language, boilerplate]);
+    }, [language]); // Only re-run when language changes
+
+    // This effect handles content updates when the user switches problems,
+    // without destroying the editor instance. This fixes the focus issue.
+    useEffect(() => {
+        if (viewRef.current && boilerplate !== viewRef.current.state.doc.toString()) {
+            viewRef.current.dispatch({
+                changes: { from: 0, to: viewRef.current.state.doc.length, insert: boilerplate || '' }
+            });
+        }
+    }, [boilerplate]);
 
     return <div ref={editorRef} className="h-full w-full bg-[#2d2d2d]"></div>;
 };
