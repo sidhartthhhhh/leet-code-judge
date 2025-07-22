@@ -22,8 +22,6 @@ import { EditorView, keymap } from '@codemirror/view';
 
 // --- Configuration ---
 const API_BASE_URL = "http://127.0.0.1:5000";
-const API_BASE = "https://leet-backend.onrender.com";
-
 
 // --- Firebase Configuration ---
 const firebaseConfig = {
@@ -45,19 +43,223 @@ const mockProblems = [
         title: "Two Sum",
         difficulty: "Easy",
         description: `<p class="mb-4">Given an array of integers <code>nums</code> and an integer <code>target</code>, return indices of the two numbers such that they add up to <code>target</code>.</p><p>You may assume that each input would have <strong>exactly one solution</strong>, and you may not use the <em>same</em> element twice.</p><p>You can return the answer in any order.</p>`,
-        examples: [ { input: 'nums = [2,7,11,15], target = 9', output: '[0,1]', explanation: 'Because nums[0] + nums[1] == 9, we return [0, 1].' } ],
-        constraints: [ '<code>2 <= nums.length <= 10<sup>4</sup></code>' ],
-        boilerplate: { python: `class Solution:\n    def twoSum(self, nums: list[int], target: int) -> list[int]:\n        pass` }
+        examples: [
+            { input: 'nums = [2,7,11,15], target = 9', output: '[0,1]', explanation: 'Because nums[0] + nums[1] == 9, we return [0, 1].' },
+            { input: 'nums = [3,2,4], target = 6', output: '[1,2]' },
+        ],
+        constraints: [
+            '<code>2 <= nums.length <= 10<sup>4</sup></code>',
+            '<code>-10<sup>9</sup> <= nums[i] <= 10<sup>9</sup></code>',
+            '<code>-10<sup>9</sup> <= target <= 10<sup>9</sup></code>',
+            '<strong>Only one valid answer exists.</strong>'
+        ],
+        hints: ['Use a hash map to store the numbers you have seen and their indices.'],
+        boilerplate: {
+            python: `class Solution:\n    def twoSum(self, nums: list[int], target: int) -> list[int]:\n        # Your code here\n        pass`,
+            javascript: `/**\n * @param {number[]} nums\n * @param {number} target\n * @return {number[]}\n */\nvar twoSum = function(nums, target) {\n    \n};`,
+            java: `class Solution {\n    public int[] twoSum(int[] nums, int target) {\n        \n    }\n}`,
+            cpp: `class Solution {\npublic:\n    vector<int> twoSum(vector<int>& nums, int target) {\n        \n    }\n};`
+        }
     },
-].concat([...Array(49)].map((_, i) => ({ id: 1000 + i, title: `Placeholder Problem ${i + 1}`, difficulty: ["Easy", "Medium", "Hard"][i % 3], description: `<p>This is a placeholder description for problem ${i + 1}.</p>`, examples: [], constraints: [], boilerplate: { python: `# Placeholder for problem ${i + 1}` } })));
-
-// --- Components ---
+    {
+        id: 9,
+        title: "Palindrome Number",
+        difficulty: "Easy",
+        description: `<p class="mb-4">Given an integer <code>x</code>, return <code>true</code> if <code>x</code> is a palindrome, and <code>false</code> otherwise.</p>`,
+        examples: [
+            { input: 'x = 121', output: 'true', explanation: '121 reads as 121 from left to right and from right to left.' },
+            { input: 'x = -121', output: 'false', explanation: 'From left to right, it reads -121. From right to left, it becomes 121-. Therefore it is not a palindrome.' },
+            { input: 'x = 10', output: 'false', explanation: 'Reads 01 from right to left. Therefore it is not a palindrome.' },
+        ],
+        constraints: ['<code>-2<sup>31</sup> <= x <= 2<sup>31</sup> - 1</code>'],
+        hints: ['Could you solve it without converting the integer to a string?'],
+        boilerplate: {
+            python: `class Solution:\n    def isPalindrome(self, x: int) -> bool:\n        # Your code here\n        pass`,
+            javascript: `/**\n * @param {number} x\n * @return {boolean}\n */\nvar isPalindrome = function(x) {\n    \n};`,
+            java: `class Solution {\n    public boolean isPalindrome(int x) {\n        \n    }\n}`,
+            cpp: `class Solution {\npublic:\n    bool isPalindrome(int x) {\n        \n    }\n};`
+        }
+    },
+    {
+        id: 13,
+        title: "Roman to Integer",
+        difficulty: "Easy",
+        description: `<p class="mb-4">Given a roman numeral, convert it to an integer.</p>`,
+        examples: [
+            { input: 's = "III"', output: '3' },
+            { input: 's = "LVIII"', output: '58', explanation: 'L = 50, V= 5, III = 3.' },
+            { input: 's = "MCMXCIV"', output: '1994', explanation: 'M = 1000, CM = 900, XC = 90 and IV = 4.' },
+        ],
+        constraints: [
+            '<code>1 <= s.length <= 15</code>',
+            '<code>s</code> contains only the characters (<code>I</code>, <code>V</code>, <code>X</code>, <code>L</code>, <code>C</code>, <code>D</code>, <code>M</code>).',
+            'It is guaranteed that <code>s</code> is a valid roman numeral in the range [1, 3999].'
+        ],
+        hints: ['Iterate through the string. If the current value is less than the next value, subtract it. Otherwise, add it.'],
+        boilerplate: {
+            python: `class Solution:\n    def romanToInt(self, s: str) -> int:\n        # Your code here\n        pass`,
+            javascript: `/**\n * @param {string} s\n * @return {number}\n */\nvar romanToInt = function(s) {\n    \n};`,
+            java: `class Solution {\n    public int romanToInt(String s) {\n        \n    }\n}`,
+            cpp: `class Solution {\npublic:\n    int romanToInt(string s) {\n        \n    }\n};`
+        }
+    },
+    {
+        id: 14,
+        title: "Longest Common Prefix",
+        difficulty: "Easy",
+        description: `<p class="mb-4">Write a function to find the longest common prefix string amongst an array of strings.</p><p>If there is no common prefix, return an empty string <code>""</code>.</p>`,
+        examples: [
+            { input: 'strs = ["flower","flow","flight"]', output: '"fl"' },
+            { input: 'strs = ["dog","racecar","car"]', output: '""', explanation: 'There is no common prefix among the input strings.' },
+        ],
+        constraints: [
+            '<code>1 <= strs.length <= 200</code>',
+            '<code>0 <= strs[i].length <= 200</code>',
+            '<code>strs[i]</code> consists of only lower-case English letters.'
+        ],
+        hints: ['You can use the first string as a reference and compare it with all other strings.'],
+        boilerplate: {
+            python: `class Solution:\n    def longestCommonPrefix(self, strs: list[str]) -> str:\n        # Your code here\n        pass`,
+            javascript: `/**\n * @param {string[]} strs\n * @return {string}\n */\nvar longestCommonPrefix = function(strs) {\n    \n};`,
+            java: `class Solution {\n    public String longestCommonPrefix(String[] strs) {\n        \n    }\n}`,
+            cpp: `class Solution {\npublic:\n    string longestCommonPrefix(vector<string>& strs) {\n        \n    }\n};`
+        }
+    },
+    {
+        id: 20,
+        title: "Valid Parentheses",
+        difficulty: "Easy",
+        description: `<p class="mb-4">Given a string <code>s</code> containing just the characters <code>'('</code>, <code>')'</code>, <code>'{'</code>, <code>'}'</code>, <code>'['</code> and <code>']'</code>, determine if the input string is valid.</p><p>An input string is valid if:</p><ol class="list-decimal list-inside"><li>Open brackets must be closed by the same type of brackets.</li><li>Open brackets must be closed in the correct order.</li></ol>`,
+        examples: [
+            { input: 's = "()"', output: 'true' },
+            { input: 's = "()[]{}"', output: 'true' },
+            { input: 's = "(]"', output: 'false' },
+        ],
+        constraints: [
+            '<code>1 <= s.length <= 10<sup>4</sup></code>',
+            '<code>s</code> consists of parentheses only <code>\'()[]{}\'</code>.'
+        ],
+        hints: ['Use a stack data structure.'],
+        boilerplate: {
+            python: `class Solution:\n    def isValid(self, s: str) -> bool:\n        # Your code here\n        pass`,
+            javascript: `/**\n * @param {string} s\n * @return {boolean}\n */\nvar isValid = function(s) {\n    \n};`,
+            java: `class Solution {\n    public boolean isValid(String s) {\n        \n    }\n}`,
+            cpp: `class Solution {\npublic:\n    bool isValid(string s) {\n        \n    }\n};`
+        }
+    },
+    {
+        id: 58,
+        title: "Length of Last Word",
+        difficulty: "Easy",
+        description: `<p class="mb-4">Given a string <code>s</code> consisting of words and spaces, return the length of the <strong>last</strong> word in the string.</p><p>A <strong>word</strong> is a maximal substring consisting of non-space characters only.</p>`,
+        examples: [
+            { input: 's = "Hello World"', output: '5' },
+            { input: 's = "   fly me   to   the moon  "', output: '4' },
+        ],
+        constraints: [
+            '<code>1 <= s.length <= 10<sup>4</sup></code>',
+            '<code>s</code> consists of only English letters and spaces \' \'.'
+        ],
+        hints: ['Trim the trailing spaces and then find the last space.'],
+        boilerplate: {
+            python: `class Solution:\n    def lengthOfLastWord(self, s: str) -> int:\n        # Your code here\n        pass`,
+            javascript: `/**\n * @param {string} s\n * @return {number}\n */\nvar lengthOfLastWord = function(s) {\n    \n};`,
+            java: `class Solution {\n    public int lengthOfLastWord(String s) {\n        \n    }\n}`,
+            cpp: `class Solution {\npublic:\n    int lengthOfLastWord(string s) {\n        \n    }\n};`
+        }
+    },
+    {
+        id: 121,
+        title: "Best Time to Buy and Sell Stock",
+        difficulty: "Easy",
+        description: `<p class="mb-4">You are given an array <code>prices</code> where <code>prices[i]</code> is the price of a given stock on the <code>i<sup>th</sup></code> day.</p><p>You want to maximize your profit by choosing a <strong>single day</strong> to buy one stock and choosing a <strong>different day in the future</strong> to sell that stock.</p><p>Return the maximum profit you can achieve from this transaction. If you cannot achieve any profit, return <code>0</code>.</p>`,
+        examples: [
+            { input: 'prices = [7,1,5,3,6,4]', output: '5', explanation: 'Buy on day 2 (price = 1) and sell on day 5 (price = 6), profit = 6-1 = 5.' },
+            { input: 'prices = [7,6,4,3,1]', output: '0', explanation: 'In this case, no transactions are done and the max profit is 0.' },
+        ],
+        constraints: [
+            '<code>1 <= prices.length <= 10<sup>5</sup></code>',
+            '<code>0 <= prices[i] <= 10<sup>4</sup></code>'
+        ],
+        hints: ['Keep track of the minimum price found so far and the maximum profit.'],
+        boilerplate: {
+            python: `class Solution:\n    def maxProfit(self, prices: list[int]) -> int:\n        # Your code here\n        pass`,
+            javascript: `/**\n * @param {number[]} prices\n * @return {number}\n */\nvar maxProfit = function(prices) {\n    \n};`,
+            java: `class Solution {\n    public int maxProfit(int[] prices) {\n        \n    }\n}`,
+            cpp: `class Solution {\npublic:\n    int maxProfit(vector<int>& prices) {\n        \n    }\n};`
+        }
+    },
+    {
+        id: 217,
+        title: "Contains Duplicate",
+        difficulty: "Easy",
+        description: `<p class="mb-4">Given an integer array <code>nums</code>, return <code>true</code> if any value appears <strong>at least twice</strong> in the array, and return <code>false</code> if every element is distinct.</p>`,
+        examples: [
+            { input: 'nums = [1,2,3,1]', output: 'true' },
+            { input: 'nums = [1,2,3,4]', output: 'false' },
+        ],
+        constraints: [
+            '<code>1 <= nums.length <= 10<sup>5</sup></code>',
+            '<code>-10<sup>9</sup> <= nums[i] <= 10<sup>9</sup></code>'
+        ],
+        hints: ['Use a hash set to keep track of the numbers you have seen.'],
+        boilerplate: {
+            python: `class Solution:\n    def containsDuplicate(self, nums: list[int]) -> bool:\n        # Your code here\n        pass`,
+            javascript: `/**\n * @param {number[]} nums\n * @return {boolean}\n */\nvar containsDuplicate = function(nums) {\n    \n};`,
+            java: `class Solution {\n    public boolean containsDuplicate(int[] nums) {\n        \n    }\n}`,
+            cpp: `class Solution {\npublic:\n    bool containsDuplicate(vector<int>& nums) {\n        \n    }\n};`
+        }
+    },
+    {
+        id: 242,
+        title: "Valid Anagram",
+        difficulty: "Easy",
+        description: `<p class="mb-4">Given two strings <code>s</code> and <code>t</code>, return <code>true</code> if <code>t</code> is an anagram of <code>s</code>, and <code>false</code> otherwise.</p><p>An <strong>Anagram</strong> is a word or phrase formed by rearranging the letters of a different word or phrase, typically using all the original letters exactly once.</p>`,
+        examples: [
+            { input: 's = "anagram", t = "nagaram"', output: 'true' },
+            { input: 's = "rat", t = "car"', output: 'false' },
+        ],
+        constraints: [
+            '<code>1 <= s.length, t.length <= 5 * 10<sup>4</sup></code>',
+            '<code>s</code> and <code>t</code> consist of lowercase English letters.'
+        ],
+        hints: ['Use a hash map or an array of size 26 to count the frequency of characters.'],
+        boilerplate: {
+            python: `class Solution:\n    def isAnagram(self, s: str, t: str) -> bool:\n        # Your code here\n        pass`,
+            javascript: `/**\n * @param {string} s\n * @param {string} t\n * @return {boolean}\n */\nvar isAnagram = function(s, t) {\n    \n};`,
+            java: `class Solution {\n    public boolean isAnagram(String s, String t) {\n        \n    }\n}`,
+            cpp: `class Solution {\npublic:\n    bool isAnagram(string s, string t) {\n        \n    }\n};`
+        }
+    },
+    {
+        id: 49,
+        title: "Group Anagrams",
+        difficulty: "Medium",
+        description: `<p class="mb-4">Given an array of strings <code>strs</code>, group <strong>the anagrams</strong> together. You can return the answer in <strong>any order</strong>.</p>`,
+        examples: [
+            { input: 'strs = ["eat","tea","tan","ate","nat","bat"]', output: '[["bat"],["nat","tan"],["ate","eat","tea"]]' },
+        ],
+        constraints: [
+            '<code>1 <= strs.length <= 10<sup>4</sup></code>',
+            '<code>0 <= strs[i].length <= 100</code>',
+            '<code>strs[i]</code> consists of lowercase English letters.'
+        ],
+        hints: ['Use a hash map where the key is the sorted version of a string.'],
+        boilerplate: {
+            python: `class Solution:\n    def groupAnagrams(self, strs: list[str]) -> list[list[str]]:\n        # Your code here\n        pass`,
+            javascript: `/**\n * @param {string[]} strs\n * @return {string[][]}\n */\nvar groupAnagrams = function(strs) {\n    \n};`,
+            java: `class Solution {\n    public List<List<String>> groupAnagrams(String[] strs) {\n        \n    }\n}`,
+            cpp: `class Solution {\npublic:\n    vector<vector<string>> groupAnagrams(vector<string>& strs) {\n        \n    }\n};`
+        }
+    },
+].concat([...Array(40)].map((_, i) => ({ id: 1000 + i, title: `Placeholder Problem ${i + 11}`, difficulty: ["Easy", "Medium", "Hard"][i % 3], description: `<p>This is a placeholder description for problem ${i + 11}.</p>`, examples: [], constraints: [], boilerplate: { python: `# Placeholder for problem ${i + 11}` } })));
+        
+// ... The rest of the App.jsx file remains the same ...
 
 const CodeEditor = ({ language, boilerplate, onCodeChange }) => {
     const editorRef = useRef(null);
     const viewRef = useRef(null);
 
-    // This effect initializes the editor and re-initializes it ONLY when the language changes.
     useEffect(() => {
         if (!editorRef.current) return;
 
@@ -74,7 +276,6 @@ const CodeEditor = ({ language, boilerplate, onCodeChange }) => {
             }
         });
         
-        // Destroy the previous instance if it exists
         if (viewRef.current) {
             viewRef.current.destroy();
         }
@@ -97,10 +298,8 @@ const CodeEditor = ({ language, boilerplate, onCodeChange }) => {
             }
         }
 
-    }, [language]); // Only re-run when language changes
+    }, [language]); 
 
-    // This effect handles content updates when the user switches problems,
-    // without destroying the editor instance. This fixes the focus issue.
     useEffect(() => {
         if (viewRef.current && boilerplate !== viewRef.current.state.doc.toString()) {
             viewRef.current.dispatch({
@@ -143,6 +342,14 @@ const ProblemDescription = ({ problem }) => {
                     <h3 className="font-semibold mb-2 text-gray-200">Constraints:</h3>
                     <ul className="list-disc list-inside space-y-1 text-sm text-gray-400">
                         {problem.constraints.map((c, index) => <li key={index} dangerouslySetInnerHTML={{ __html: c }} />)}
+                    </ul>
+                </div>
+            )}
+             {problem.hints && problem.hints.length > 0 && (
+                 <div className="mt-6">
+                    <h3 className="font-semibold mb-2 text-gray-200">Hints:</h3>
+                     <ul className="list-disc list-inside space-y-1 text-sm text-gray-400">
+                        {problem.hints.map((h, index) => <li key={index}>{h}</li>)}
                     </ul>
                 </div>
             )}
