@@ -18,7 +18,7 @@
     "@codemirror/state": "^6.4.1",
     "@codemirror/theme-one-dark": "^6.1.2",
     "@codemirror/view": "^6.26.3",
-    "firebase": "^10.12.2",
+    "firebase": "^9.23.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
