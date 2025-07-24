@@ -395,6 +395,8 @@ const ResultPanel = ({ result }) => {
     useEffect(() => {
         if (result) {
             setActiveTab('result');
+        } else {
+            setActiveTab('testcase');
         }
     }, [result]);
 
@@ -509,6 +511,7 @@ const LeetCodeJudge = ({ user, onProfileClick }) => {
 
     const handleSubmit = async () => {
         if (isSubmitting) return;
+
         setIsSubmitting(true);
         setSubmissionResult({ status: 'PENDING' });
 
@@ -516,33 +519,30 @@ const LeetCodeJudge = ({ user, onProfileClick }) => {
             clearInterval(pollingIntervalRef.current);
         }
 
-        // This timeout ensures the UI has a chance to render the "PENDING" state
-        setTimeout(async () => {
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/v1/submissions`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        user_id: user.uid,
-                        problem_id: currentProblem.id,
-                        code: code,
-                        language: language,
-                    }),
-                });
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/v1/submissions`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    user_id: user.uid,
+                    problem_id: currentProblem.id,
+                    code: code,
+                    language: language,
+                }),
+            });
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const data = await response.json();
-                pollForResult(data.submission_id);
-
-            } catch (error) {
-                console.error("Submission failed:", error);
-                setSubmissionResult({ status: 'Submission Error' });
-                setIsSubmitting(false);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
-        }, 0);
+
+            const data = await response.json();
+            pollForResult(data.submission_id);
+
+        } catch (error) {
+            console.error("Submission failed:", error);
+            setSubmissionResult({ status: 'Submission Error' });
+            setIsSubmitting(false);
+        }
     };
     
     useEffect(() => {
@@ -792,7 +792,7 @@ export default function App() {
             return <LoginPage onGoogleLogin={handleGoogleLogin} onGithubLogin={handleGithubLogin} onBack={() => setView('landing')} error={authError} />;
         case 'app':
             if (!user) return <LandingPage onLoginClick={handleLoginClick} />;
-            return <LeetCodeJudge user={user} onLogout={handleLogout} onProfileClick={() => setView('dashboard')} />;
+            return <LeetCodeJudge user={user} onProfileClick={() => setView('dashboard')} />;
         case 'dashboard':
             if (!user) return <LandingPage onLoginClick={handleLoginClick} />;
             return <DashboardPage user={user} onLogout={handleLogout} onBackToApp={() => setView('app')} />;
