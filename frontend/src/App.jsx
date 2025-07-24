@@ -391,25 +391,70 @@ const ProblemListModal = ({ problems, onSelectProblem, onClose }) => {
 
 const ResultPanel = ({ result }) => {
     const [activeTab, setActiveTab] = useState('testcase');
+
+    useEffect(() => {
+        if (result) {
+            setActiveTab('result');
+        }
+    }, [result]);
+
+    const getStatusPill = (status) => {
+        switch (status) {
+            case 'PENDING':
+            case 'Running':
+                return <span className="px-3 py-1 text-sm font-semibold rounded-full bg-yellow-400 text-yellow-900 animate-pulse">{status}...</span>;
+            case 'Accepted':
+                return <span className="px-3 py-1 text-sm font-semibold rounded-full bg-green-400 text-green-900">Accepted</span>;
+            default:
+                return <span className="px-3 py-1 text-sm font-semibold rounded-full bg-red-400 text-red-900">{status || 'Error'}</span>;
+        }
+    };
+    
     return (
         <div className="bg-gray-800 text-gray-300 rounded-b-lg">
             <div className="flex border-b border-gray-700">
-                <button onClick={() => setActiveTab('testcase')} className={`px-4 py-2 text-sm font-medium ${activeTab === 'testcase' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:bg-gray-700/50'}`}>Testcase</button>
-                <button onClick={() => setActiveTab('result')} className={`px-4 py-2 text-sm font-medium ${activeTab === 'result' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:bg-gray-700/50'}`}>Test Result</button>
+                <button 
+                    onClick={() => setActiveTab('testcase')}
+                    className={`px-4 py-2 text-sm font-medium ${activeTab === 'testcase' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:bg-gray-700/50'}`}>
+                    Testcase
+                </button>
+                <button 
+                    onClick={() => setActiveTab('result')}
+                    className={`px-4 py-2 text-sm font-medium ${activeTab === 'result' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:bg-gray-700/50'}`}>
+                    Test Result
+                </button>
             </div>
-            <div className="p-4">
+            <div className="p-4 min-h-[120px]">
                 {activeTab === 'testcase' && (
                     <div>
                         <label className="text-xs font-semibold" htmlFor="testcase-input">Input</label>
                         <textarea id="testcase-input" className="w-full mt-1 p-2 bg-gray-900 border border-gray-600 rounded-md text-sm font-mono" rows="3" defaultValue='s = "leeetcode"'></textarea>
                     </div>
                 )}
-                {activeTab === 'result' && ( !result ? <p className="text-gray-500">Run submission to see result.</p> : <div>Result Here</div> )}
+                {activeTab === 'result' && (
+                    !result ? (
+                        <div className="flex items-center justify-center h-full">
+                            <p className="text-gray-500">Submit your code to see the result.</p>
+                        </div>
+                    ) : (
+                        <div>
+                            <div className="flex items-center gap-4 mb-4">
+                                {getStatusPill(result.status)}
+                            </div>
+                            {result.status !== 'PENDING' && result.status !== 'Running' && result.result && (
+                                <div className="space-y-2 text-sm">
+                                    <p><strong>Runtime:</strong> <span className="font-mono">{result.result.runtime_ms} ms</span></p>
+                                    <p><strong>Memory:</strong> <span className="font-mono">{result.result.memory_kb} KB</span></p>
+                                </div>
+                            )}
+                        </div>
+                    )
+                )}
             </div>
         </div>
     )
 };
-
+        
 const Footer = () => {
     return (
         <footer className="w-full text-center p-4 text-gray-500 text-xs">
@@ -426,6 +471,7 @@ const LeetCodeJudge = ({ user, onProfileClick }) => {
     const [submissionResult, setSubmissionResult] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isProblemListVisible, setIsProblemListVisible] = useState(false);
+    const pollingIntervalRef = useRef(null);
 
     useEffect(() => {
         setCode(currentProblem.boilerplate[language]);
@@ -438,7 +484,72 @@ const LeetCodeJudge = ({ user, onProfileClick }) => {
         setCurrentProblem(problem);
         setIsProblemListVisible(false);
     };
-    const handleSubmit = async () => setIsSubmitting(true);
+
+    const pollForResult = (submissionId) => {
+        pollingIntervalRef.current = setInterval(async () => {
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/v1/submissions/${submissionId}`);
+                if (!res.ok) throw new Error('Polling failed');
+                const data = await res.json();
+                
+                setSubmissionResult(data);
+
+                if (data.status !== 'PENDING' && data.status !== 'Running') {
+                    clearInterval(pollingIntervalRef.current);
+                    setIsSubmitting(false);
+                }
+            } catch (error) {
+                console.error("Polling error:", error);
+                setSubmissionResult({ status: 'Polling Error' });
+                clearInterval(pollingIntervalRef.current);
+                setIsSubmitting(false);
+            }
+        }, 2000);
+    };
+
+    const handleSubmit = async () => {
+        if (isSubmitting) return;
+        setIsSubmitting(true);
+        setSubmissionResult({ status: 'PENDING' });
+
+        if (pollingIntervalRef.current) {
+            clearInterval(pollingIntervalRef.current);
+        }
+
+        // This timeout ensures the UI has a chance to render the "PENDING" state
+        setTimeout(async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/v1/submissions`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: user.uid,
+                        problem_id: currentProblem.id,
+                        code: code,
+                        language: language,
+                    }),
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                pollForResult(data.submission_id);
+
+            } catch (error) {
+                console.error("Submission failed:", error);
+                setSubmissionResult({ status: 'Submission Error' });
+                setIsSubmitting(false);
+            }
+        }, 0);
+    };
+    
+    useEffect(() => {
+        return () => {
+            if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
+        };
+    }, []);
 
     return (
         <div className="flex flex-col h-screen font-sans bg-gray-900 text-gray-200">
