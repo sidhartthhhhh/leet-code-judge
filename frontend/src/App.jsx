@@ -7,6 +7,7 @@ import {
     signInWithPopup,
     signOut
 } from 'firebase/auth';
+import { doc, getDoc, getFirestore, setDoc } from 'firebase/firestore';
 import { useEffect, useRef, useState } from 'react';
 
 // Import CodeMirror libraries
@@ -35,6 +36,7 @@ const firebaseConfig = {
 };
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app); // Initialize Firestore
 
 // --- Mock Data ---
 const mockProblems = [
@@ -515,6 +517,9 @@ const LeetCodeJudge = ({ user, onProfileClick }) => {
         setIsSubmitting(true);
         setSubmissionResult({ status: 'PENDING' });
 
+        // This allows the UI to render the "PENDING" state before the fetch call
+        await new Promise(resolve => setTimeout(resolve, 0)); 
+
         if (pollingIntervalRef.current) {
             clearInterval(pollingIntervalRef.current);
         }
@@ -626,7 +631,7 @@ const LoginPage = ({ onGoogleLogin, onGithubLogin, onBack, error }) => {
                         Sign in with Google
                     </button>
                     <button onClick={onGithubLogin} className="w-full flex items-center justify-center gap-3 bg-gray-900 hover:bg-black text-white font-bold py-3 px-4 rounded-lg transition">
-                        <svg className="w-6 h-6" viewBox="0 0 16 16" fill="currentColor"><path fillRule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>
+                        <svg className="w-6 h-6" viewBox="0 0 16 16" fill="currentColor"><path fillRule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36 .09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>
                         Sign in with GitHub
                     </button>
                 </div>
@@ -646,14 +651,36 @@ const DashboardPage = ({ user, onLogout, onBackToApp }) => {
         github: ''
     });
 
+    useEffect(() => {
+        const fetchSocials = async () => {
+            if (user) {
+                const userDocRef = doc(db, 'users', user.uid);
+                const docSnap = await getDoc(userDocRef);
+                if (docSnap.exists()) {
+                    setSocials(docSnap.data().socials || {});
+                }
+            }
+        };
+        fetchSocials();
+    }, [user]);
+
+
     const handleSocialChange = (e) => {
         const { name, value } = e.target;
         setSocials(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSave = () => {
-        console.log("Saving social links:", socials); // In a real app, save to a database
-        setIsEditing(false);
+    const handleSave = async () => {
+        if (user) {
+            const userDocRef = doc(db, 'users', user.uid);
+            try {
+                await setDoc(userDocRef, { socials }, { merge: true });
+                console.log("Social links saved successfully!");
+                setIsEditing(false);
+            } catch (error) {
+                console.error("Error saving social links:", error);
+            }
+        }
     };
 
     return (
@@ -705,7 +732,7 @@ const DashboardPage = ({ user, onLogout, onBackToApp }) => {
                             <a href={socials.linkedin || '#'} target="_blank" rel="noopener noreferrer" className={socials.linkedin ? 'text-gray-400 hover:text-white transition' : 'text-gray-600 cursor-not-allowed'} title="LinkedIn"><svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M19,3A2,2 0 0,1 21,5V19A2,2 0 0,1 19,21H5A2,2 0 0,1 3,19V5A2,2 0 0,1 5,3H19M18.5,18.5V13.2A3.26,3.26 0 0,0 15.24,9.94C14.39,9.94 13.4,10.43 12.92,11.24V10.13H10.13V18.5H12.92V13.57C12.92,12.8 13.54,12.17 14.31,12.17A1.4,1.4 0 0,1 15.71,13.57V18.5H18.5M6.88,8.56A1.68,1.68 0 0,0 8.56,6.88C8.56,6 7.78,5.2 6.88,5.2A1.69,1.69 0 0,0 5.2,6.88C5.2,7.78 6,8.56 6.88,8.56M8.27,18.5V10.13H5.5V18.5H8.27Z" /></svg></a>
                             <a href={socials.facebook || '#'} target="_blank" rel="noopener noreferrer" className={socials.facebook ? 'text-gray-400 hover:text-white transition' : 'text-gray-600 cursor-not-allowed'} title="Facebook"><svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.04C6.5 2.04 2 6.53 2 12.06C2 17.06 5.66 21.21 10.44 21.96V14.96H7.9V12.06H10.44V9.85C10.44 7.32 11.93 5.96 14.22 5.96C15.31 5.96 16.45 6.15 16.45 6.15V8.62H15.19C13.95 8.62 13.56 9.39 13.56 10.18V12.06H16.34L15.89 14.96H13.56V21.96A10 10 0 0 0 22 12.06C22 6.53 17.5 2.04 12 2.04Z" /></svg></a>
                             <a href={socials.stackoverflow || '#'} target="_blank" rel="noopener noreferrer" className={socials.stackoverflow ? 'text-gray-400 hover:text-white transition' : 'text-gray-600 cursor-not-allowed'} title="Stack Overflow"><svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M17.5,20H6.5V18H17.5V20M18,17H6A1,1 0 0,1 5,16V11H7V15H18V17M19,14H5V9H7V13H19V14M20,12H5V7H7V11H20V12M21,5H5V2H21V5Z" /></svg></a>
-                            <a href={socials.github || '#'} target="_blank" rel="noopener noreferrer" className={socials.github ? 'text-gray-400 hover:text-white transition' : 'text-gray-600 cursor-not-allowed'} title="GitHub"><svg className="w-8 h-8" fill="currentColor" viewBox="0 0 16 16"><path fillRule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg></a>
+                            <a href={socials.github || '#'} target="_blank" rel="noopener noreferrer" className={socials.github ? 'text-gray-400 hover:text-white transition' : 'text-gray-600 cursor-not-allowed'} title="GitHub"><svg className="w-8 h-8" fill="currentColor" viewBox="0 0 16 16"><path fillRule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36 .09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg></a>
                         </div>
                     )}
                 </div>
